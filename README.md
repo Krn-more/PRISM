@@ -92,7 +92,17 @@ Cluster IDs are membership labels for review and sorting; they are not similarit
 
 ## Configuration and secrets
 
-Copy `.env.example` to `.env`; never commit `.env` or credentials. Azure AI is disabled unless the relevant variables and explicit enablement flags are configured.
+The committed [.env.example](.env.example) is an empty, credential-free template. It contains only blank Azure AI variable names and disabled AI flags. Never commit a real `.env` file.
+
+The existing Portable Beta EXE does **not** require `.env` to run the local PDF extraction, identity resolution, deterministic structural classification, clustering, and Excel export workflow. `.env` is not embedded in `PRISM_Beta.exe`.
+
+Create `.env` beside `PRISM_Beta.exe` only when Azure AI cluster reasoning is approved and configured:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Populate the approved Azure values and set both `XAI_ENABLED=true` and `XAI_STAGE6_ENABLED=true`. Without these settings, PRISM remains fully usable in deterministic local mode and records AI reasoning as unavailable rather than blocking the workbook workflow.
 
 The default mode is deterministic local processing. Public identity-resolution lookups are used only when permitted by the deployment. See [docs/TECHNICAL_ARCHITECTURE.md](docs/TECHNICAL_ARCHITECTURE.md) for the current data flow and network allow-list information.
 

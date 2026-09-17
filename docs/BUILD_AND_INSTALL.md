@@ -55,6 +55,8 @@ If PowerShell prevents activation, use Command Prompt instead:
 
 `.env` is local deployment configuration and must not be committed to Git.
 
+The portable EXE does not need `.env` for the local deterministic workflow. PyInstaller does not package `.env` into `PRISM_Beta.exe`. Use `.env` beside the EXE only when the approved Azure AI cluster-reasoning capability is enabled.
+
 | Setting | Required? | Purpose |
 |---|---:|---|
 | `XAI_ENABLED` and `XAI_STAGE6_ENABLED` | No | Enables Azure OpenAI cluster-reasoning drafts when explicitly approved. |
