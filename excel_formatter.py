@@ -1,6 +1,9 @@
 import pandas as pd
 import xlsxwriter
 from io import BytesIO
+from datetime import datetime
+
+from rdkit import Chem
 
 from chemont_export import chemont_display_frame
 from cluster_summary import build_cluster_summary
@@ -144,6 +147,231 @@ def _flatten_metadata(value, prefix=""):
     return rows
 
 
+def _usable_structure_mask(frame: pd.DataFrame) -> pd.Series:
+    """Return a conservative structure-eligibility mask for dashboard counts."""
+    smiles = _first_matching_series(frame, "Standardized SMILES")
+    if smiles is None:
+        return pd.Series(False, index=frame.index, dtype=bool)
+
+    def _is_usable(value: object) -> bool:
+        if value is None or pd.isna(value):
+            return False
+        text = str(value).strip()
+        if not text or text.casefold() in {"nan", "none", "not available", "not assessable"}:
+            return False
+        try:
+            return Chem.MolFromSmiles(text) is not None
+        except Exception:
+            return False
+
+    return smiles.map(_is_usable)
+
+
+def _nonempty_unique_count(series: pd.Series | None) -> int:
+    if series is None:
+        return 0
+    values = series.astype(str).str.strip()
+    return int(values.loc[~values.str.casefold().isin({"", "nan", "none", "not available", "not assessable"})].nunique())
+
+
+def _build_dashboard_data(df: pd.DataFrame, raw_df: pd.DataFrame | None, cluster_summary_df: pd.DataFrame) -> tuple[list[tuple[str, int]], pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Build display-only dashboard counts from the same frames exported below."""
+    usable_structure = _usable_structure_mask(df)
+    casrn = _first_matching_series(df, "CASRN")
+    cluster_id = _first_matching_series(df, "Cluster ID")
+    compatibility = _first_matching_series(df, "Compatibility Group")
+    if compatibility is None:
+        compatibility = _first_matching_series(df, "Cluster Family")
+    manual_flag = _first_matching_series(df, "Manual Review Flag")
+    manual_reason = _first_matching_series(df, "Manual Review Reason")
+    alerts = _first_matching_series(df, "Alerts")
+
+    if cluster_id is None:
+        clustered = pd.Series(False, index=df.index, dtype=bool)
+        cluster_values = pd.Series("", index=df.index, dtype=object)
+    else:
+        cluster_values = cluster_id.astype(str).str.strip()
+        clustered = usable_structure & ~cluster_values.str.casefold().isin({"", "nan", "none", "not assessable", "not available"})
+
+    if manual_flag is None:
+        manual = pd.Series(False, index=df.index, dtype=bool)
+    else:
+        manual = manual_flag.astype(str).str.strip().str.casefold().isin({"1", "true", "yes", "y", "review", "required"})
+    if manual_reason is not None:
+        reason_text = manual_reason.astype(str).str.strip().str.casefold()
+        manual = manual | ~reason_text.isin({"", "nan", "none", "not available"})
+
+    if alerts is None:
+        alert_mask = pd.Series(False, index=df.index, dtype=bool)
+    else:
+        alert_mask = ~alerts.astype(str).str.strip().str.casefold().isin({"", "nan", "none", "not available", "not assessed", "not assessable"})
+
+    valid_cluster_ids = cluster_values.loc[clustered]
+    cluster_sizes = valid_cluster_ids.value_counts()
+    if "Cluster Size" in df.columns:
+        exported_sizes = pd.to_numeric(_first_matching_series(df, "Cluster Size"), errors="coerce")
+        singleton_clusters = int(valid_cluster_ids.loc[exported_sizes.loc[clustered].eq(1)].nunique())
+    else:
+        singleton_clusters = int((cluster_sizes == 1).sum())
+
+    metrics = [
+        ("Raw extracted source rows", int(len(raw_df)) if raw_df is not None else 0),
+        ("Final deduplicated chemical records", int(len(df))),
+        ("Unique reported CASRNs", _nonempty_unique_count(casrn)),
+        ("Unique resolved standardised structures", _nonempty_unique_count(_first_matching_series(df.loc[usable_structure], "Standardized SMILES"))),
+        ("Structure-resolved records", int(usable_structure.sum())),
+        ("Unresolved / non-structural records", int((~usable_structure).sum())),
+        ("Grouping-eligible records", int(usable_structure.sum())),
+        ("Compatibility groups", _nonempty_unique_count(compatibility.loc[usable_structure] if compatibility is not None else None)),
+        ("Structural clusters", int(valid_cluster_ids.nunique())),
+        ("Clustered records", int(clustered.sum())),
+        ("Singleton clusters", singleton_clusters),
+        ("SME review required", int(manual.sum())),
+        ("Records with structural alerts", int(alert_mask.sum())),
+    ]
+
+    def _distribution(series: pd.Series | None, label: str) -> pd.DataFrame:
+        if series is None:
+            return pd.DataFrame(columns=[label, "Record Count"])
+        values = series.astype(str).str.strip().replace({"": "Not available", "nan": "Not available", "None": "Not available"})
+        return values.value_counts().rename_axis(label).reset_index(name="Record Count").head(12)
+
+    compatibility_distribution = _distribution(compatibility.loc[usable_structure] if compatibility is not None else None, "Compatibility Group")
+    class_distribution = _distribution(_first_matching_series(df, "Corrected Chemical Class"), "Corrected Chemical Class")
+    resolution_distribution = pd.DataFrame([
+        {"Identity / Structure Status": "Structure resolved", "Record Count": int(usable_structure.sum())},
+        {"Identity / Structure Status": "Unresolved or non-structural", "Record Count": int((~usable_structure).sum())},
+        {"Identity / Structure Status": "SME review required", "Record Count": int(manual.sum())},
+    ])
+    return metrics, compatibility_distribution, class_distribution, resolution_distribution
+
+
+def _write_sme_review_guide(workbook, header_format, cell_format, alt_row_format):
+    """Create the concise, workbook-native SME instruction sheet."""
+    worksheet = workbook.add_worksheet("SME Review Guide")
+    worksheet.hide_gridlines(2)
+    title_format = workbook.add_format({'bold': True, 'font_size': 16, 'font_color': '#203764'})
+    subtitle_format = workbook.add_format({'italic': True, 'font_color': '#595959', 'text_wrap': True, 'valign': 'top'})
+    warning_format = workbook.add_format({'bold': True, 'font_color': '#9C0006', 'bg_color': '#FCE4D6', 'text_wrap': True, 'valign': 'top', 'border': 1, 'border_color': '#F4B183'})
+    worksheet.merge_range('A1:D1', 'PRISM SME Workbook Review Guide', title_format)
+    worksheet.merge_range('A2:D3', 'Use this guide to review the exported chemical records, deterministic classifications, and structural grouping. Detailed Analysis and Cluster Summary remain the authoritative evidence sheets.', subtitle_format)
+    worksheet.merge_range('A5:D6', 'Review boundary: PRISM supports structured chemical grouping. It does not establish endpoint equivalence, read-across acceptability, exposure equivalence, safety, or a final toxicological conclusion. SME review remains required.', warning_format)
+
+    rows = [
+        ('1', 'Read the Workbook Contract', 'Confirm field definitions, status values, and calculation boundaries before interpreting results.'),
+        ('2', 'Verify Raw Extraction (Pre-Dedup)', 'Check priority compound names, CASRNs, sources, pages/tables, concentrations, and duplicate/alias handling against the analytical report.'),
+        ('3', 'Triage Summary', 'Filter Manual Review Flag first, then Uncertainty Summary, Cluster ID, Cluster Size, and Compound Name.'),
+        ('4', 'Confirm identity and structure', 'Review Compound Name, CASRN, Standardized SMILES, InChIKey, identity status, and source evidence. Do not use missing/invalid structures for analogue evidence.'),
+        ('5', 'Review classification', 'Assess Corrected Chemical Class, functional groups, taxonomy, toxicophore profile, and structural alerts for chemical plausibility.'),
+        ('6', 'Review Cluster Summary', 'Check Compatibility Group, cluster cohesion, scaffold/ionisation/alert compatibility, property compatibility, membership rationale, and stability.'),
+        ('7', 'Record the SME outcome', 'Use: Accept for analogue review; Accept with limitations; Do not use for analogue review; or SME review/follow-up required.'),
+    ]
+    worksheet.write_row(8, 0, ['Step', 'Review activity', 'What to do'], header_format)
+    for offset, row in enumerate(rows, start=9):
+        worksheet.write(offset, 0, row[0], alt_row_format if offset % 2 else cell_format)
+        worksheet.write(offset, 1, row[1], alt_row_format if offset % 2 else cell_format)
+        worksheet.write(offset, 2, row[2], alt_row_format if offset % 2 else cell_format)
+
+    worksheet.write_row(18, 0, ['Status', 'Meaning for review'], header_format)
+    definitions = [
+        ('Computed', 'Calculated in the current PRISM run; still subject to field-specific uncertainty and SME review.'),
+        ('Preview only', 'Review-support information, not an approved conclusion or release decision.'),
+        ('Retired', 'Historical/disabled field retained only for traceability; do not use in a new decision.'),
+        ('Not assessable', 'A defensible calculation could not be made from available information; it is not a negative result.'),
+        ('Unclassified', 'No sufficiently supported structural class is available; review identity/source evidence.'),
+        ('SME Review Required', 'A limitation or boundary requires documented SME judgement before use.'),
+    ]
+    for offset, row in enumerate(definitions, start=19):
+        worksheet.write(offset, 0, row[0], alt_row_format if offset % 2 else cell_format)
+        worksheet.merge_range(offset, 1, offset, 3, row[1], alt_row_format if offset % 2 else cell_format)
+
+    worksheet.write_row(27, 0, ['SME decision record', 'Complete for priority compound or cluster review'], header_format)
+    worksheet.write_row(28, 0, ['Reviewer', 'Review date', 'Endpoint / intended use', 'Outcome', 'Rationale and follow-up'], header_format)
+    for row in range(29, 34):
+        worksheet.write_row(row, 0, ['', '', '', '', ''], alt_row_format if row % 2 else cell_format)
+    worksheet.set_column('A:A', 14)
+    worksheet.set_column('B:B', 30)
+    worksheet.set_column('C:C', 62)
+    worksheet.set_column('D:D', 24)
+    worksheet.freeze_panes(8, 0)
+    return worksheet
+
+
+def _write_dashboard(workbook, metrics, compatibility_distribution, class_distribution, resolution_distribution):
+    """Create a display-only, auditable overview driven by export data."""
+    worksheet = workbook.add_worksheet("Dashboard")
+    worksheet.hide_gridlines(2)
+    title_format = workbook.add_format({'bold': True, 'font_size': 16, 'font_color': '#203764'})
+    subtitle_format = workbook.add_format({'italic': True, 'font_color': '#595959'})
+    metric_label_format = workbook.add_format({'bold': True, 'font_color': '#203764', 'bg_color': '#D9EAF7', 'border': 1, 'border_color': '#8EA9DB', 'text_wrap': True, 'valign': 'vcenter'})
+    metric_value_format = workbook.add_format({'bold': True, 'font_size': 14, 'align': 'center', 'bg_color': '#F7FBFF', 'border': 1, 'border_color': '#8EA9DB', 'num_format': '#,##0'})
+    note_format = workbook.add_format({'italic': True, 'font_color': '#595959', 'text_wrap': True, 'valign': 'top'})
+    header_format = workbook.add_format({'bold': True, 'text_wrap': True, 'valign': 'top', 'align': 'center', 'fg_color': '#203764', 'font_color': 'white', 'border': 1, 'border_color': '#8EA9DB'})
+    cell_format = workbook.add_format({'valign': 'top', 'text_wrap': True, 'border': 1, 'border_color': '#A6A6A6'})
+
+    worksheet.merge_range('A1:L1', 'PRISM Workbook Dashboard', title_format)
+    worksheet.merge_range('A2:L2', 'Overview generated from the same records exported in this workbook. Detailed Analysis and Cluster Summary remain authoritative.', subtitle_format)
+    worksheet.write('J3', 'Generated', note_format)
+    worksheet.write('K3', datetime.now().strftime('%Y-%m-%d %H:%M:%S'), note_format)
+
+    for index, (label, value) in enumerate(metrics):
+        row = 4 + (index // 4) * 2
+        col = (index % 4) * 3
+        worksheet.merge_range(row, col, row, col + 1, label, metric_label_format)
+        worksheet.merge_range(row + 1, col, row + 1, col + 1, value, metric_value_format)
+
+    worksheet.merge_range('A13:H14', 'Definitions: Raw data = all extracted source rows before duplicate handling. Unique chemical records = final deduplicated output records; unique CASRNs and standardised structures are shown separately. Grouping-eligible = usable standardised structures. Clustered = grouping-eligible records assigned to a structural cluster; singleton clusters are counted separately.', note_format)
+
+    def _write_distribution(start_row, start_col, title, frame):
+        worksheet.write(start_row, start_col, title, header_format)
+        worksheet.write_row(start_row + 1, start_col, list(frame.columns), header_format)
+        for offset, values in enumerate(frame.itertuples(index=False, name=None), start=start_row + 2):
+            worksheet.write_row(offset, start_col, list(values), cell_format)
+        return max(start_row + 2, start_row + 1 + len(frame))
+
+    compatibility_end = _write_distribution(16, 0, 'Compounds by compatibility group', compatibility_distribution)
+    class_end = _write_distribution(16, 4, 'Compounds by corrected chemical class', class_distribution)
+    resolution_end = _write_distribution(16, 8, 'Identity and review status', resolution_distribution)
+
+    if not compatibility_distribution.empty:
+        chart = workbook.add_chart({'type': 'bar'})
+        chart.add_series({
+            'name': 'Records',
+            'categories': ['Dashboard', 18, 0, compatibility_end, 0],
+            'values': ['Dashboard', 18, 1, compatibility_end, 1],
+            'fill': {'color': '#4472C4'},
+        })
+        chart.set_title({'name': 'Compounds by compatibility group'})
+        chart.set_legend({'none': True})
+        chart.set_x_axis({'name': 'Record count', 'min': 0})
+        chart.set_y_axis({'reverse': True})
+        worksheet.insert_chart('A32', chart, {'x_scale': 1.15, 'y_scale': 1.15})
+    if not resolution_distribution.empty:
+        chart = workbook.add_chart({'type': 'doughnut'})
+        chart.add_series({
+            'name': 'Records',
+            'categories': ['Dashboard', 18, 8, resolution_end, 8],
+            'values': ['Dashboard', 18, 9, resolution_end, 9],
+            'data_labels': {'value': True},
+        })
+        chart.set_title({'name': 'Identity and review status'})
+        chart.set_legend({'position': 'bottom'})
+        worksheet.insert_chart('H32', chart, {'x_scale': 1.05, 'y_scale': 1.15})
+
+    worksheet.set_column('A:A', 26)
+    worksheet.set_column('B:B', 14)
+    worksheet.set_column('C:C', 3)
+    worksheet.set_column('D:D', 3)
+    worksheet.set_column('E:E', 30)
+    worksheet.set_column('F:F', 14)
+    worksheet.set_column('G:G', 3)
+    worksheet.set_column('H:H', 3)
+    worksheet.set_column('I:I', 32)
+    worksheet.set_column('J:J', 14)
+    worksheet.set_column('K:L', 16)
+    return worksheet
+
+
 def format_excel_output(df: pd.DataFrame, out_buffer: BytesIO, raw_tables: list = None):
     """Format the Phase B workbook with one deterministic compound sheet."""
     source_attrs = dict(getattr(df, 'attrs', {}))
@@ -258,11 +486,47 @@ def format_excel_output(df: pd.DataFrame, out_buffer: BytesIO, raw_tables: list 
     red_format = workbook.add_format({'bg_color': '#FFC7CE', 'font_color': '#9C0006'})
     yellow_format = workbook.add_format({'bg_color': '#FFEB9C', 'font_color': '#9C6500'})
 
-    # The raw PDF extraction is the first tab in every PDF-workflow workbook.
-    # It is an immutable source view and is deliberately created before the
-    # reader-facing review sheets; it never feeds downstream calculations.
-    if raw_tables:
-        combined_raw = pd.concat(raw_tables, ignore_index=True)
+    # Reader-facing guide and overview are placed first.  They are generated
+    # solely from the same source, detailed, and cluster frames exported below;
+    # neither worksheet feeds any calculation or modifies a scientific result.
+    combined_raw = pd.concat(raw_tables, ignore_index=True) if raw_tables else None
+    metrics, compatibility_distribution, class_distribution, resolution_distribution = _build_dashboard_data(
+        df, combined_raw, cluster_summary_df
+    )
+    _write_sme_review_guide(workbook, header_format, cell_format, alt_row_format)
+    _write_dashboard(workbook, metrics, compatibility_distribution, class_distribution, resolution_distribution)
+
+    # The contract precedes the source and analysis sheets so field definitions
+    # are immediately available to reviewers.
+    if not isinstance(workbook_contract, pd.DataFrame) or workbook_contract.empty:
+        workbook_contract = build_workbook_contract_frame()
+    elif (
+        "Column" in workbook_contract.columns
+        and "Column Headers - Detailed Analysis sheet" not in workbook_contract.columns
+    ):
+        # Older saved run-state payloads may carry the former generic header.
+        # Normalize it at export so every final workbook uses the same contract.
+        workbook_contract = workbook_contract.rename(columns={
+            "Column": "Column Headers - Detailed Analysis sheet"
+        })
+    if isinstance(workbook_contract, pd.DataFrame) and not workbook_contract.empty:
+        workbook_contract.to_excel(writer, index=False, sheet_name='Workbook Contract')
+        contract_worksheet = writer.sheets['Workbook Contract']
+        for col_num, value in enumerate(workbook_contract.columns.values):
+            contract_worksheet.write(0, col_num, value, header_format)
+        for row_num in range(len(workbook_contract)):
+            fmt = alt_row_format if row_num % 2 == 1 else cell_format
+            for col_num, value in enumerate(workbook_contract.iloc[row_num]):
+                contract_worksheet.write(row_num + 1, col_num, '' if pd.isna(value) else value, fmt)
+        for col_num, column in enumerate(workbook_contract.columns):
+            contract_worksheet.set_column(col_num, col_num, min(80, _safe_column_width(workbook_contract, column, cap=80, floor=14)))
+        contract_worksheet.freeze_panes(1, 0)
+        contract_worksheet.autofilter(0, 0, len(workbook_contract), len(workbook_contract.columns) - 1)
+
+    # The raw PDF extraction is an immutable source view. It is displayed
+    # after the review guide, dashboard, and contract, and never feeds
+    # downstream calculations in the exported workbook.
+    if combined_raw is not None:
         raw_sheet_name = 'Raw Extraction (Pre-Dedup)'
         combined_raw.to_excel(writer, index=False, sheet_name=raw_sheet_name)
         raw_worksheet = writer.sheets[raw_sheet_name]
@@ -348,24 +612,6 @@ def format_excel_output(df: pd.DataFrame, out_buffer: BytesIO, raw_tables: list 
             if review_col is not None:
                 worksheet.conditional_format(1, review_col, len(sheet_df), review_col,
                                              {'type': 'cell', 'criteria': '==', 'value': '"Pending"', 'format': yellow_format})
-
-    # Keep the reader-facing Summary and Detailed Analysis sheets first.  The
-    # contract remains available immediately after them as audit documentation.
-    if not isinstance(workbook_contract, pd.DataFrame) or workbook_contract.empty:
-        workbook_contract = build_workbook_contract_frame()
-    if isinstance(workbook_contract, pd.DataFrame) and not workbook_contract.empty:
-        workbook_contract.to_excel(writer, index=False, sheet_name='Workbook Contract')
-        contract_worksheet = writer.sheets['Workbook Contract']
-        for col_num, value in enumerate(workbook_contract.columns.values):
-            contract_worksheet.write(0, col_num, value, header_format)
-        for row_num in range(len(workbook_contract)):
-            fmt = alt_row_format if row_num % 2 == 1 else cell_format
-            for col_num, value in enumerate(workbook_contract.iloc[row_num]):
-                contract_worksheet.write(row_num + 1, col_num, '' if pd.isna(value) else value, fmt)
-        for col_num, column in enumerate(workbook_contract.columns):
-            contract_worksheet.set_column(col_num, col_num, min(80, _safe_column_width(workbook_contract, column, cap=80, floor=14)))
-        contract_worksheet.freeze_panes(1, 0)
-        contract_worksheet.autofilter(0, 0, len(workbook_contract), len(workbook_contract.columns) - 1)
 
     # Stage 3 normalized, review-only uncertainty evidence. This is deliberately
     # separate from the processed compound sheets so every action remains auditable.

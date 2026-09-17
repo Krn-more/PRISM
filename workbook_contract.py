@@ -411,7 +411,7 @@ def build_workbook_contract_frame() -> pd.DataFrame:
         {
             "Workbook Order": "",
             "Section": "Status definitions",
-            "Column": label,
+            "Column Headers - Detailed Analysis sheet": label,
             "Status": "Definition",
             "Notes": definition,
         }
@@ -426,7 +426,7 @@ def build_workbook_contract_frame() -> pd.DataFrame:
                 {
                     "Workbook Order": order,
                     "Section": section["section"],
-                    "Column": column,
+                    "Column Headers - Detailed Analysis sheet": column,
                     "Status": section["status"],
                     "Notes": section["notes"],
                 }
@@ -437,9 +437,11 @@ def build_workbook_contract_frame() -> pd.DataFrame:
             {
                 "Workbook Order": "",
                 "Section": "Retired workbook fields",
-                "Column": retired,
+                "Column Headers - Detailed Analysis sheet": retired,
                 "Status": "retired",
                 "Notes": "Excluded from the final workbook contract.",
             }
         )
-    return pd.DataFrame(rows, columns=["Workbook Order", "Section", "Column", "Status", "Notes"])
+    return pd.DataFrame(rows, columns=[
+        "Workbook Order", "Section", "Column Headers - Detailed Analysis sheet", "Status", "Notes",
+    ])

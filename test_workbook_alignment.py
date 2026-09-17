@@ -52,7 +52,7 @@ class WorkbookAlignmentTests(unittest.TestCase):
     def test_contract_starts_with_status_definitions(self):
         contract = build_workbook_contract_frame()
         definitions = contract.loc[contract["Section"] == "Status definitions"]
-        self.assertEqual(definitions["Column"].tolist(), ["Computed", "Preview only", "Retired", "Cluster identifier convention"])
+        self.assertEqual(definitions["Column Headers - Detailed Analysis sheet"].tolist(), ["Computed", "Preview only", "Retired", "Cluster identifier convention"])
         self.assertTrue(definitions["Notes"].str.len().gt(40).all())
 
     def test_review_reason_reconciles_surrogate_and_unresolved_rows(self):

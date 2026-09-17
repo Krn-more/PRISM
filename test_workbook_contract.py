@@ -38,7 +38,7 @@ class WorkbookContractTests(unittest.TestCase):
 
         self.assertIn("Workbook Order", contract_frame.columns)
         self.assertIn("Section", contract_frame.columns)
-        self.assertIn("Column", contract_frame.columns)
+        self.assertIn("Column Headers - Detailed Analysis sheet", contract_frame.columns)
         retired_rows = contract_frame[contract_frame["Status"] == "retired"]
         self.assertGreaterEqual(len(retired_rows), len(RETIRED_WORKBOOK_COLUMNS))
 

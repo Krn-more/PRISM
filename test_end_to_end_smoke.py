@@ -68,7 +68,20 @@ class EndToEndSmokeTests(unittest.TestCase):
         workbook = BytesIO()
         format_excel_output(result, workbook, raw_tables=[source])
         sheet_names = pd.ExcelFile(BytesIO(workbook.getvalue())).sheet_names
-        self.assertEqual(sheet_names[0], "Raw Extraction (Pre-Dedup)")
+        self.assertEqual(
+            sheet_names[:7],
+            [
+                "SME Review Guide",
+                "Dashboard",
+                "Workbook Contract",
+                "Raw Extraction (Pre-Dedup)",
+                "Summary",
+                "Cluster Summary",
+                "Detailed Analysis",
+            ],
+        )
+        contract_headers = pd.read_excel(BytesIO(workbook.getvalue()), sheet_name="Workbook Contract", nrows=0).columns.tolist()
+        self.assertIn("Column Headers - Detailed Analysis sheet", contract_headers)
         with ZipFile(BytesIO(workbook.getvalue())) as archive:
             workbook_xml = archive.read("xl/workbook.xml").decode("utf-8")
 
