@@ -1,0 +1,60 @@
+{
+  "rule_version": "1.0.0-review-only",
+  "mode": "review_only",
+  "descriptor_columns": [
+    "HBD",
+    "HBA",
+    "Rotatable_Bonds",
+    "Formal_Charge",
+    "Ring_Count",
+    "Aromatic_Ring_Count",
+    "Fraction_CSP3",
+    "Heavy_Atom_Count",
+    "Molecular_Refractivity",
+    "Ionisation_Indicator"
+  ],
+  "numeric_descriptor_columns": [
+    "HBD",
+    "HBA",
+    "Rotatable_Bonds",
+    "Formal_Charge",
+    "Ring_Count",
+    "Aromatic_Ring_Count",
+    "Fraction_CSP3",
+    "Heavy_Atom_Count",
+    "Molecular_Refractivity"
+  ],
+  "categorical_descriptor_columns": [
+    "Ionisation_Indicator"
+  ],
+  "descriptor_weights": {
+    "HBD": 0.08,
+    "HBA": 0.08,
+    "Rotatable_Bonds": 0.10,
+    "Formal_Charge": 0.10,
+    "Ring_Count": 0.12,
+    "Aromatic_Ring_Count": 0.08,
+    "Fraction_CSP3": 0.10,
+    "Heavy_Atom_Count": 0.10,
+    "Molecular_Refractivity": 0.09,
+    "Ionisation_Indicator": 0.15
+  },
+  "soft_layer_weight": 0.20,
+  "minimum_available_columns": 3,
+  "cluster_cohesion_thresholds": {
+    "perfect_mean_pairwise_distance": 0.05,
+    "aligned_mean_pairwise_distance": 0.25
+  },
+  "ionisation_distance": {
+    "same_known": 0.0,
+    "different_known": 0.35,
+    "one_unknown": 0.55,
+    "both_unknown": 0.20
+  },
+  "governance": [
+    "This layer is review-only and may not replace the deterministic consensus machinery.",
+    "The descriptor set is a soft similarity layer, not a hard cluster gate.",
+    "Missing descriptor values reduce evidence strength but do not force a split.",
+    "Any future hard gating must be approved as a separate change request."
+  ]
+}

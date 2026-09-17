@@ -1,0 +1,32 @@
+{
+  "rule_version": "1.0.0-review-only",
+  "mode": "review_only",
+  "class_source_priority": [
+    "Taxonomy Hierarchy",
+    "Corrected Chemical Class",
+    "Chemical Class"
+  ],
+  "hierarchy_distance_weights": {
+    "same_structural_type": 0.0,
+    "same_subclass": 0.10,
+    "same_functional_group": 0.25,
+    "same_parent_class": 0.45,
+    "same_corrected_class": 0.60,
+    "missing_class_information": 0.50,
+    "different_family": 1.00
+  },
+  "soft_layer_weight": 0.15,
+  "cluster_cohesion_threshold": 0.65,
+  "cohesion_status_labels": {
+    "perfect": "Chemically coherent",
+    "strong": "Chemically aligned",
+    "mixed": "Chemically mixed",
+    "not_assessable": "Not assessable"
+  },
+  "governance": [
+    "This layer is review-only and may not replace the deterministic consensus machinery.",
+    "Chemical class is a soft similarity layer, not a hard exclusion rule.",
+    "Missing or unresolved class information must not force a cluster split.",
+    "Any future hard gating must be approved as a separate change request."
+  ]
+}

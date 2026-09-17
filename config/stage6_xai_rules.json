@@ -1,0 +1,25 @@
+{
+  "matrix_version": "1.0.0-review-only",
+  "prompt_version": "1.0.0-grounded-json",
+  "max_source_text_length": 500,
+  "max_rendered_characters": 1800,
+  "required_output_fields": [
+    "cluster_grouping_rationale",
+    "assessment_boundary",
+    "uncertainty",
+    "evidence_ids",
+    "uncertainty_ids",
+    "claim_evidence"
+  ],
+  "banned_claim_patterns": [
+    "\\bsafe\\b",
+    "\\bsafety\\b",
+    "\\bnon[- ]?toxic\\b",
+    "\\bregulatory approval\\b",
+    "\\bfda[- ]?approved\\b",
+    "\\bacceptable risk\\b"
+  ],
+  "endpoint_claim_terms": [
+    "genotoxic", "mutagen", "sensiti", "carcin", "cancer", "reproductive", "developmental", "systemic toxicity"
+  ]
+}

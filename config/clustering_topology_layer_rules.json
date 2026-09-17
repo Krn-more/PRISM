@@ -1,0 +1,37 @@
+{
+  "rule_version": "1.0.0-review-only",
+  "mode": "review_only",
+  "topology_columns": [
+    "Topology Class",
+    "Topology Modifiers",
+    "Ring System",
+    "Ring Profile",
+    "Ring Count",
+    "Aromatic Ring Count",
+    "Alcohol Context"
+  ],
+  "soft_layer_weight": 0.15,
+  "categorical_distance_weights": {
+    "Topology Class": 0.25,
+    "Topology Modifiers": 0.20,
+    "Ring System": 0.15,
+    "Ring Profile": 0.10,
+    "Alcohol Context": 0.10
+  },
+  "numeric_distance_weights": {
+    "Ring Count": 0.10,
+    "Aromatic Ring Count": 0.10
+  },
+  "status_labels": {
+    "perfect": "Topologically coherent",
+    "strong": "Topologically aligned",
+    "mixed": "Topologically mixed",
+    "not_assessable": "Not assessable"
+  },
+  "governance": [
+    "This layer is review-only and may not replace the deterministic consensus machinery.",
+    "Ring topology is a soft similarity layer, not a hard cluster gate.",
+    "Missing topology fields reduce evidence strength but do not force a split.",
+    "Any future hard gating must be approved as a separate change request."
+  ]
+}

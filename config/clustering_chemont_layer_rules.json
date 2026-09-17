@@ -1,0 +1,54 @@
+{
+  "rule_version": "1.0.0-review-only",
+  "mode": "review_only",
+  "hierarchy_columns": [
+    "ChemOnt_Kingdom",
+    "ChemOnt_Superclass",
+    "ChemOnt_Class",
+    "ChemOnt_Subclass",
+    "ChemOnt_Direct_Parent",
+    "ChemOnt_Molecular_Framework",
+    "ChemOnt_Substituents"
+  ],
+  "taxonomy_fallback_columns": [
+    "Taxonomy Hierarchy",
+    "Taxonomy Path",
+    "Corrected Chemical Class"
+  ],
+  "soft_layer_weight": 0.10,
+  "level_weights": {
+    "ChemOnt_Kingdom": 0.05,
+    "ChemOnt_Superclass": 0.08,
+    "ChemOnt_Class": 0.16,
+    "ChemOnt_Subclass": 0.17,
+    "ChemOnt_Direct_Parent": 0.18,
+    "ChemOnt_Molecular_Framework": 0.16,
+    "ChemOnt_Substituents": 0.12,
+    "Taxonomy_Hierarchy": 0.05,
+    "Taxonomy_Path": 0.03
+  },
+  "substituent_distance": {
+    "same": 0.0,
+    "subset": 0.25,
+    "partial_overlap": 0.55,
+    "different": 0.90,
+    "one_unknown": 0.45,
+    "both_unknown": 0.20
+  },
+  "cohesion_thresholds": {
+    "perfect_mean_distance": 0.05,
+    "aligned_mean_distance": 0.22
+  },
+  "status_labels": {
+    "perfect": "Taxonomically coherent",
+    "strong": "Taxonomically aligned",
+    "mixed": "Taxonomically mixed",
+    "not_assessable": "Not assessable"
+  },
+  "governance": [
+    "This layer is review-only and may not replace the deterministic consensus machinery.",
+    "ChemOnt and taxonomy agreement are soft similarity signals, not hard cluster gates.",
+    "Missing hierarchy values reduce evidence strength but do not force a split.",
+    "Any future hard gating must be approved as a separate change request."
+  ]
+}

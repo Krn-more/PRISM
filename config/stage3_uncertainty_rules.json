@@ -1,0 +1,31 @@
+{
+  "rule_version": "1.1.0-review-only",
+  "mode": "review_only",
+  "categories": ["Identity", "Structure", "Reactivity", "Property", "Biological", "Exposure", "Domain"],
+  "exposure_context_columns": ["Est Conc (ug/device)", "Concentration (ug/device)", "Est Conc (ug/cm2)", "Concentration (ug/cm2)"],
+  "identity": {
+    "missing": {"level": "High", "action": "Resolve and document identity status before analogue selection or read-across use."},
+    "unresolved_terms": ["unresolved", "tier 3", "fallback required", "no structure"],
+    "unresolved": {"level": "High", "action": "Resolve identity before analogue selection or read-across use."},
+    "review_terms": ["surrogate", "partial", "ambiguous", "related compound", "typo corrected"],
+    "review": {"level": "Medium", "action": "Document and verify the surrogate or partial identity before use."},
+    "resolved_terms": ["resolved", "exact match"],
+    "resolved": {"level": "Low", "action": ""},
+    "other": {"level": "Medium", "action": "Confirm the identity-resolution status and supporting identifier before use."}
+  },
+  "structure": {"calculated": {"level": "Low", "action": ""}, "unavailable": {"level": "High", "action": "Obtain a valid standardized structure before using structural grouping evidence."}},
+  "reactivity": {"flagged": {"level": "Medium", "action": "Review reactive features and local chemical environment before shared assessment."}, "unavailable": {"level": "High", "action": "Obtain a valid standardized structure and re-run structural alert screening."}, "clear": {"level": "Low", "action": ""}},
+  "property": {"incomplete": {"level": "Medium", "action": "Review member-level property ranges when sufficient comparable members are available."}, "outlier": {"level": "Medium", "action": "Review flagged property differences before shared assessment."}, "clear": {"level": "Low", "action": ""}},
+  "biological": {"level": "High", "reason": "No endpoint evidence retrieved in Stage 3", "action": "Retrieve and review endpoint-specific biological evidence; do not infer an endpoint conclusion from grouping alone."},
+  "exposure": {"provided": {"level": "Medium", "action": "Confirm route, duration, device/product context, and exposure assumptions for the intended assessment."}, "missing": {"level": "High", "action": "Request concentration, route, duration, and intended-use exposure context."}},
+  "domain": {
+    "missing": {"level": "High", "action": "Run or resolve Stage 2 domain evidence before using this grouping for shared assessment."},
+    "high_statuses": ["Not assessable", "Outside"],
+    "high": {"level": "High", "action": "Do not use direct read-across; resolve the stated domain limitation or assess separately."},
+    "medium_statuses": ["Borderline"],
+    "medium": {"level": "Medium", "action": "Document member-specific differences and toxicologist rationale before shared assessment."},
+    "low_statuses": ["Inside"],
+    "low": {"level": "Low", "action": ""},
+    "other": {"level": "High", "action": "Confirm the Stage 2 domain status before using this grouping for shared assessment."}
+  }
+}

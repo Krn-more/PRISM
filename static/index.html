@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRISM | Extractables &amp; Leachables Assessment</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=7">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <div class="brand-mark" aria-label="PRISM logo"><img src="prism-logo.png" alt="PRISM logo"></div>
+                <div class="brand-copy">
+                    <div class="brand-title-row"><h1>PRISM</h1><span class="beta-badge">Beta</span></div>
+                    <span>Extractables &amp; Leachables</span>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="active"><i data-lucide="activity"></i> Assessment</a>
+            </nav>
+            <div class="sidebar-footer">
+                <p>PRISM Assessment Module v1.0</p>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <h2>Extractables & Leachables Assessment</h2>
+                <p>Real-time chemical identity resolution and analog classification</p>
+            </header>
+
+            <div class="tabs-container">
+                <button class="tab-btn active" onclick="switchTab('single')">Single Assessment</button>
+                <button class="tab-btn" onclick="switchTab('pdf')">PDF Auto-Extraction</button>
+            </div>
+
+            <div class="dashboard-grid" id="assessmentLayout">
+                <!-- Input Form Panel -->
+                <section class="panel input-panel">
+                    <div id="tab-single" class="tab-content active">
+                        <h3><i data-lucide="search"></i> Target Compound</h3>
+                    <form id="assessmentForm">
+                        <div class="form-group">
+                            <label for="compound_name">Chemical Name</label>
+                            <input type="text" id="compound_name" placeholder="e.g. Aspirin, Bisphenol A">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="cas_number">CAS Number <span class="optional">(Optional)</span></label>
+                                <input type="text" id="cas_number" placeholder="e.g. 50-78-2">
+                            </div>
+                            <div class="form-group">
+                                <label for="formula">Empirical Formula <span class="optional">(Optional)</span></label>
+                                <input type="text" id="formula" placeholder="e.g. C9H8O4">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="concentration">Concentration</label>
+                                <input type="number" step="any" id="concentration" placeholder="Max value">
+                            </div>
+                            <div class="form-group">
+                                <label for="unit">Unit</label>
+                                <select id="unit">
+                                    <option value="ug/mL">ug/mL</option>
+                                    <option value="ppm">ppm</option>
+                                </select>
+                            </div>
+                        </div>
+                        <details style="margin-top: 18px; padding: 12px 14px; border: 1px solid #334155; border-radius: 10px; background: rgba(15, 23, 42, 0.45);">
+                            <summary style="cursor: pointer; color: #cbd5e1; font-weight: 600;">Optional workbook row fields</summary>
+                            <p style="margin: 12px 0 14px 0; color: #94a3b8; font-size: 0.9rem;">Paste the resolved values from the Excel workflow here to mirror the report exactly. If these are filled, the app will use them directly instead of re-querying PubChem.</p>
+                            <div class="form-group">
+                                <label for="resolved_name">Resolved Name</label>
+                                <input type="text" id="resolved_name" placeholder="e.g. 1,1-Diethoxycyclohexane">
+                            </div>
+                            <div class="form-group" style="margin-top: 12px;">
+                                <label for="original_smiles">Original SMILES</label>
+                                <input type="text" id="original_smiles" placeholder="e.g. CCOC1(CCCCC1)OCC">
+                            </div>
+                            <div class="form-group" style="margin-top: 12px;">
+                                <label for="standardized_smiles">Standardized SMILES</label>
+                                <input type="text" id="standardized_smiles" placeholder="e.g. CCOC1(OCC)CCCCC1">
+                            </div>
+                            <div class="form-group" style="margin-top: 12px;">
+                                <label for="inchikey">InChIKey</label>
+                                <input type="text" id="inchikey" placeholder="e.g. MWUDABUKTZAZCX-UHFFFAOYSA-N">
+                            </div>
+                            <div class="form-group" style="margin-top: 12px;">
+                                <label for="inchi">InChI</label>
+                                <input type="text" id="inchi" placeholder="e.g. InChI=1S/...">
+                            </div>
+                        </details>
+                        <button type="submit" class="btn-primary" id="analyzeBtn">
+                            <i data-lucide="zap"></i> Run Assessment Pipeline
+                        </button>
+                    </form>
+                    </div>
+                    
+                    
+                    <div id="tab-pdf" class="tab-content" style="display: none;">
+                        <div class="pdf-workflow-header" aria-label="PDF extraction workflow">
+                            <div>
+                                <div class="pdf-workflow-kicker">Guided extraction workflow</div>
+                                <h3>Analytical PDF processing</h3>
+                                <p>Move through each checkpoint to extract, review, resolve, and export the report.</p>
+                            </div>
+                            <span class="pdf-workflow-state" id="pdfWorkflowState">Step 1 of 6</span>
+                        </div>
+                        <nav class="pdf-stepper" aria-label="PDF extraction steps">
+                            <div class="pdf-stepper-item active" data-pdf-step="0"><span>1</span><strong>Upload</strong></div>
+                            <div class="pdf-stepper-item" data-pdf-step="1"><span>2</span><strong>Identify</strong></div>
+                            <div class="pdf-stepper-item" data-pdf-step="234"><span>3–4</span><strong>Extract</strong></div>
+                            <div class="pdf-stepper-item" data-pdf-step="5"><span>5</span><strong>Deduplicate</strong></div>
+                            <div class="pdf-stepper-item" data-pdf-step="55"><span>6–7</span><strong>Enrich &amp; export</strong></div>
+                            <div class="pdf-stepper-item" data-pdf-step="6"><span>✓</span><strong>Complete</strong></div>
+                        </nav>
+                        <div id="pdf-step0">
+                            <h3><i data-lucide="file-text"></i> Step 1: Upload Analytical PDF</h3>
+                            <p style="margin-bottom: 20px; color: #a1a1aa; font-size: 0.95rem;">Upload a raw analytical report. We will extract tables, consolidate data, and assess all compounds.</p>
+                            <form id="pdfForm">
+                                <div class="form-group">
+                                    <label for="pdf_file">PDF Report (.pdf)</label>
+                                    <input type="file" id="pdf_file" accept=".pdf" required>
+                                </div>
+                                <button type="submit" class="btn-primary" id="pdfBtn">
+                                    <i data-lucide="cpu"></i> Auto-Extract
+                                </button>
+                            </form>
+                        </div>
+                        <div id="pdf-step1" style="display: none;">
+                            <h3><i data-lucide="check-circle"></i> Step 2: Agency Identification</h3>
+                            <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                                <h4 style="margin-top: 0; margin-bottom: 5px; color: #cbd5e1;">Agency Detected</h4>
+                                <p id="pdf-agency" style="color: #93c5fd; font-size: 1.2rem; font-weight: bold; margin-bottom: 20px;">-</p>
+                                
+                                <h4 style="margin-top: 0; margin-bottom: 5px; color: #cbd5e1;">Test Type Detected</h4>
+                                <p id="pdf-analysis-type" style="color: #93c5fd; font-size: 1.2rem; font-weight: bold; margin-bottom: 0;">-</p>
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px;">
+                                <button type="button" class="btn-primary" id="pdfContinue1" style="flex: 2;">
+                                    Continue to Table Extraction
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="pdf-step234" style="display: none;">
+                            <h3><i data-lucide="table"></i> Step 3/4: Table & Caption Extraction Complete</h3>
+                            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                                <h4 style="margin-top: 0; margin-bottom: 5px; color: #cbd5e1;">Table Discovery Summary</h4>
+                                <p id="pdf-tables-summary" style="color: #6ee7b7; font-size: 1.1rem; margin-bottom: 20px;">-</p>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <h4 style="margin: 0; color: #cbd5e1;">Parsed Tables</h4>
+                                    <label style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #a1a1aa; cursor: pointer;">
+                                        <input type="checkbox" id="validTablesOnlyToggle" checked> Show Valid Only
+                                    </label>
+                                </div>
+                                <div id="pdf-captions-list" style="max-height: 200px; overflow-y: auto; background: #0f172a; padding: 10px; border-radius: 4px; margin-bottom: 20px; font-size: 0.85rem; color: #94a3b8; border: 1px solid #1e293b;">
+                                    <!-- Captions injected here -->
+                                </div>
+                                
+                                <h4 style="margin-top: 0; margin-bottom: 5px; color: #cbd5e1;">Total Raw Compounds Extracted</h4>
+                                <p id="pdf-raw-compounds" style="color: #6ee7b7; font-size: 1.2rem; font-weight: bold; margin-bottom: 0;">-</p>
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px;">
+                                <button type="button" class="btn-primary" id="pdfContinue2" style="flex: 2;">
+                                    Continue to Deduplication
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="pdf-step5" style="display: none;">
+                            <div class="pdf-step-heading">
+                                <h3 style="margin: 0;"><i data-lucide="check-square"></i> Step 5: Data Deduplication</h3>
+                            </div>
+                            <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 15px;">Review the extracted compounds below. When ready, click the button above to standardize these chemical names into SMILES structures and resolve their identities.</p>
+                            
+                            <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid #1e293b; border-radius: 8px; padding: 20px; text-align: center;">
+                                <h4 style="margin-top: 0; margin-bottom: 5px; color: #cbd5e1;">Final Unique Compounds</h4>
+                                <p style="color: #cbd5e1; font-size: 0.95rem; margin-bottom: 10px;">Duplicate compounds were grouped, retaining only the worst-case (highest) concentration for each.</p>
+                                <p id="pdf-unique-compounds" style="color: #fcd34d; font-size: 1.3rem; font-weight: bold; margin-bottom: 0;">-</p>
+                            </div>
+                            
+                            <!-- Real-time progress container -->
+                            <div id="pdf-stream-progress" style="margin-top: 15px; padding: 15px; background: rgba(0, 0, 0, 0.2); border: 1px solid #1e293b; border-radius: 6px; display: none;">
+                                <h4 style="margin: 0 0 10px 0; color: #cbd5e1; font-size: 0.9rem;">Step 6 Live Progress: Identity Resolution</h4>
+                                <p id="pdf-stream-text" style="color: #6ee7b7; font-family: monospace; font-size: 0.85rem; margin: 0;">Initializing...</p>
+                            </div>
+                            <div class="pdf-bottom-actions">
+                                <button type="button" class="btn-primary" id="pdfProceedBtn"><i data-lucide="zap"></i> Proceed to Step 6</button>
+                            </div>
+                        </div>
+
+                        <!-- NEW PHASE B LAYER -->
+                        <div id="pdf-step55" style="display: none;">
+                            <div class="pdf-step-heading" style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
+                                <h3 style="margin: 0;"><i data-lucide="download"></i> Phase B Enrichment &amp; Export</h3>
+                                <button type="button" class="btn-secondary" id="pdfDownloadPhaseATopBtn"><i data-lucide="file-down"></i> Download Phase A Excel</button>
+                            </div>
+                            
+                            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 20px;">
+                                <i data-lucide="check-circle" style="color: #10b981; width: 48px; height: 48px; margin-bottom: 10px;"></i>
+                                <h4 style="margin: 0 0 5px 0; color: #10b981;">Identity resolution complete</h4>
+                                <p style="color: #94a3b8; font-size: 0.9rem; margin: 0;" id="resolutionStatsText">Successfully standardized chemical structures.</p>
+                            </div>
+                            
+                            <p style="color: #94a3b8; font-size: 0.9rem;" id="phaseBStatusText">Phase A is ready. Enrich and classify the structures, finalize the analysis, then create and download the workbook.</p>
+                            <p style="color: #6ee7b7; font-size: 0.85rem; margin-top: 8px;">Phase A snapshot download is available now if you want to inspect the resolved row output before enrichment.</p>
+
+                            <div id="phaseBCheckpointCard" style="margin-top: 14px; padding: 12px 14px; border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 10px; background: rgba(15, 23, 42, 0.55);">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: #cbd5e1; font-size: 0.9rem; font-weight: 600;">
+                                    <i data-lucide="badge-check" style="width: 16px; height: 16px;"></i>
+                                    Analysis workflow
+                                </div>
+                                <div id="phaseBCheckpointSummary" style="margin-bottom: 10px; color: #94a3b8; font-size: 0.82rem; line-height: 1.35;">
+                                    Complete each stage in sequence. The workbook action becomes available only after analysis finalization.
+                                </div>
+                                <div style="height: 6px; border-radius: 999px; overflow: hidden; background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(148, 163, 184, 0.18); margin-bottom: 10px;">
+                                    <div id="phaseBProgressBar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #fbbf24 0%, #10b981 100%); transition: width 180ms ease;"></div>
+                                </div>
+                                <div class="phase-b-checkpoints">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: 8px; background: rgba(30, 41, 59, 0.75); border: 1px solid rgba(148, 163, 184, 0.18);">
+                                        <span style="color: #e2e8f0; font-size: 0.85rem;">1. Enrich &amp; classify</span>
+                                        <span id="phaseB1aCheckpoint" style="font-size: 0.8rem; font-weight: 700; color: #fbbf24;">Pending</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: 8px; background: rgba(30, 41, 59, 0.75); border: 1px solid rgba(148, 163, 184, 0.18);">
+                                        <span style="color: #e2e8f0; font-size: 0.85rem;">2. Finalize analysis</span>
+                                        <span id="phaseB1bCheckpoint" style="font-size: 0.8rem; font-weight: 700; color: #94a3b8;">Pending</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: 8px; background: rgba(30, 41, 59, 0.75); border: 1px solid rgba(148, 163, 184, 0.18);">
+                                        <span style="color: #e2e8f0; font-size: 0.85rem;">3. Create &amp; download workbook</span>
+                                        <span id="phaseB2Checkpoint" style="font-size: 0.8rem; font-weight: 700; color: #94a3b8;">Pending</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pdf-action-bar" aria-label="Workbook actions">
+                                <div class="pdf-action-group">
+                                    <span class="pdf-action-label">Step 1</span>
+                                    <button type="button" class="btn-primary" id="pdfRunB1aBtn"><i data-lucide="play"></i> Enrich &amp; Classify</button>
+                                </div>
+                                <div class="pdf-action-group">
+                                    <span class="pdf-action-label">Step 2</span>
+                                    <button type="button" class="btn-primary" id="pdfRunB1bBtn"><i data-lucide="play"></i> Finalize Analysis</button>
+                                </div>
+                                <div class="pdf-action-group" id="pdfB2ActionGroup">
+                                    <span class="pdf-action-label">Step 3</span>
+                                    <span class="pdf-action-locked-note" id="pdfB2LockedNote">Available after analysis finalization</span>
+                                    <button type="button" class="btn-primary" id="pdfRunB2Btn" disabled style="display:none;"><i data-lucide="download"></i> Create &amp; Download Workbook</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="pdf-step6" style="display: none;">
+                            <div style="text-align: center; padding: 40px 20px;">
+                                <i data-lucide="check-circle" style="width: 64px; height: 64px; color: #10b981; margin-bottom: 20px;"></i>
+                                <h3>Workbook Export Complete!</h3>
+                                <p style="color: #94a3b8; font-size: 1.1rem; margin-bottom: 30px;">The processed Excel matrix has been downloaded to your computer after deterministic enrichment.</p>
+                                
+                                <button type="button" class="btn-primary" id="downloadExcelBtn" style="padding: 10px 20px; font-size: 1rem; margin-bottom: 15px;">
+                                    <i data-lucide="download"></i> Download Excel Again
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Status/Output Area -->
+                <section class="panel results-panel glass-panel" id="resultsArea" style="display: none;">
+                    <div class="loader-overlay" id="loader">
+                        <div class="spinner"></div>
+                        <p>Traversing chemical space...</p>
+                    </div>
+
+                    <div id="resultsContent" style="display: none;">
+                        <div class="result-header">
+                            <h3 id="res-name">Resolving...</h3>
+                            <span class="badge" id="res-confidence">High Confidence</span>
+                        </div>
+                        
+                        <div class="timeline">
+                            <!-- Step: Identity -->
+                            <div class="timeline-step">
+                                <div class="step-icon"><i data-lucide="fingerprint"></i></div>
+                                <div class="step-content">
+                                    <h4>Identity & Structure Standardized</h4>
+                                    <div class="data-grid" id="identity-data">
+                                        <!-- Injected via JS -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step: Moieties & Groups -->
+                            <div class="timeline-step">
+                                <div class="step-icon"><i data-lucide="network"></i></div>
+                                <div class="step-content">
+                                    <h4>Functional Groups & Topology</h4>
+                                    <div class="data-list" id="topology-data">
+                                        <!-- Injected via JS -->
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Global Loader -->
+    <div id="global-loader" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+        <div class="spinner" style="width: 60px; height: 60px; border-width: 4px; margin-bottom: 20px;"></div>
+        <p style="color: #f8fafc; font-family: var(--font-heading); font-size: 1.2rem; font-weight: 600;" id="global-loader-text">Processing...</p>
+    </div>
+
+    <script src="app.js?v=20"></script>
+</body>
+</html>

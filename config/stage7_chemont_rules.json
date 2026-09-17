@@ -1,0 +1,12 @@
+{
+  "rule_version": "1.0.0-review-only",
+  "source": "ClassyFire ChemOnt API",
+  "base_url": "https://classyfire.wishartlab.com",
+  "entity_path_template": "/entities/{inchikey}.json",
+  "timeout_seconds": 8,
+  "cache_ttl_days": 180,
+  "min_request_interval_seconds": 0.5,
+  "allowed_identifier_columns": ["InChIKey"],
+  "required_output_fields": ["kingdom", "superclass", "class", "subclass", "direct_parent", "molecular_framework", "substituents"],
+  "status_version": "ChemOnt enrichment v1"
+}

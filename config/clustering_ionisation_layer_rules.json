@@ -1,0 +1,33 @@
+{
+  "rule_version": "1.0.0-review-only",
+  "mode": "review_only",
+  "ionisation_columns": [
+    "Ionisation_Indicator",
+    "Formal_Charge"
+  ],
+  "soft_layer_weight": 0.08,
+  "indicator_weight": 0.70,
+  "formal_charge_weight": 0.30,
+  "max_charge_difference": 4,
+  "indicator_distance": {
+    "same_known": 0.0,
+    "same_unknown": 0.20,
+    "one_unknown": 0.45,
+    "different_known": 0.80,
+    "acid_base_opposition": 1.00,
+    "charged_vs_neutral": 0.70,
+    "charged_vs_unknown": 0.50
+  },
+  "status_labels": {
+    "perfect": "Ionisation coherent",
+    "strong": "Ionisation aligned",
+    "mixed": "Ionisation mixed",
+    "not_assessable": "Not assessable"
+  },
+  "governance": [
+    "This layer is review-only and may not replace the deterministic consensus machinery.",
+    "Ionisation is a soft similarity layer, not a hard cluster gate.",
+    "Missing charge/indicator values reduce evidence strength but do not force a split.",
+    "Any future hard gating must be approved as a separate change request."
+  ]
+}

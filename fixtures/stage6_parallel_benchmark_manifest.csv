@@ -1,0 +1,21 @@
+Case_ID,Cluster_Profile,Primary_Evidence_Variation,Expected_Grounded_Eligibility,Reviewer_Focus
+S6-01,Coherent aromatic ether cluster,Shared scaffold and narrow calculated-property range,Eligible,Concise grouping rationale
+S6-02,Same-scaffold property outlier,Rotatable-bond outlier,Eligible,Member-specific property limitation
+S6-03,Aldehyde divergent member,Aldehyde toxicophore and alert,Eligible,Reactivity limitation without endpoint conclusion
+S6-04,Ionisation divergence,Acidic and neutral members,Eligible,Ionisation limitation
+S6-05,Surrogate identity member,Surrogate identity review evidence,Eligible,Provisional membership wording
+S6-06,Unresolved identity,Missing structure and high identity uncertainty,Eligible,No unsupported grouping assertion
+S6-07,Invalid structure,Invalid structure and not-assessable domain,Eligible,Explicit assessment boundary
+S6-08,Singleton cluster,No pairwise analogue evidence,Eligible,Singleton limitation
+S6-09,Outside-domain member,High domain uncertainty and action,Eligible,Separate-assessment boundary
+S6-10,Borderline similarity cluster,Nearest-neighbour similarity below threshold,Eligible,Similarity limitation
+S6-11,No endpoint ledger,No endpoint evidence retrieved,Eligible,No inferred biological conclusion
+S6-12,Reviewed endpoint ledger,Retrieved reviewed provenance row,Eligible,Do not state endpoint conclusion
+S6-13,EPA unavailable,EPA status unavailable,Eligible,External-data limitation
+S6-14,Target data unavailable,ChEMBL target field unavailable,Eligible,Biological-data limitation
+S6-15,No structural alerts,No configured alerts or toxicophores,Eligible,Do not overstate absence of hazard
+S6-16,Multiple structural alerts,More than one alert profile,Eligible,Alert-review boundary
+S6-17,Exposure context supplied,Analytical concentration field supplied,Eligible,Exposure still requires route/duration context
+S6-18,Exposure context missing,High exposure uncertainty,Eligible,Required-action wording
+S6-19,Property data incomplete,Insufficient members for IQR screening,Eligible,Calculated-property limitation
+S6-20,Mixed cluster uncertainties,"Identity, reactivity, property, biological and domain flags",Eligible,Traceability to all cited evidence

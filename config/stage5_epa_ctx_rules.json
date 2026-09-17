@@ -1,0 +1,12 @@
+{
+  "rule_version": "1.0.0-read-only",
+  "base_url": "https://comptox.epa.gov/ctx-api",
+  "chemical_equal_path": "/chemical/search/equal/",
+  "hazard_by_dtxsid_path": "/hazard/toxval/search/by-dtxsid/",
+  "source_version": "EPA CTX Hazard API; ToxValDB v9.6; ToxRefDB v2.1",
+  "timeout_seconds": 45,
+  "max_retries": 2,
+  "min_request_interval_seconds": 0.25,
+  "cache_ttl_days": 30,
+  "allowed_identifier_columns": ["DTXSID", "InChIKey", "CAS", "CASRN"]
+}

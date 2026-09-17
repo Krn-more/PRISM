@@ -1,0 +1,11 @@
+Compound Name,Standardized SMILES,Fixture Role
+Ethanol,CCO,Neutral small reference
+Acetic acid,CC(=O)O,Likely acidic reference
+Triethylamine,CCN(CC)CC,Likely basic reference
+Glycine,NCC(=O)O,Amphoteric reference
+Tetramethylammonium,C[N+](C)(C)C,Permanently charged reference
+Benzene,c1ccccc1,Aromatic ring reference
+Phenethyl alcohol,OCCc1ccccc1,Coherent aromatic analogue
+4-vinylbenzaldehyde,O=Cc1ccc(C=C)cc1,Alert and toxicophore reference
+Unresolved,,Missing structure reference
+Invalid structure,not-a-smiles,Invalid structure reference

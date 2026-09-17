@@ -1,0 +1,25 @@
+{
+  "rule_version": "1.0.0-review-only",
+  "mode": "review_only",
+  "toxicophore_columns": [
+    "Toxicophore_Profile",
+    "All_Structural_Alerts",
+    "Alerts"
+  ],
+  "soft_layer_weight": 0.12,
+  "profile_weight": 0.45,
+  "all_alerts_weight": 0.35,
+  "first_alert_weight": 0.20,
+  "status_labels": {
+    "perfect": "Toxicophore coherent",
+    "strong": "Toxicophore aligned",
+    "mixed": "Toxicophore mixed",
+    "not_assessable": "Not assessable"
+  },
+  "governance": [
+    "This layer is review-only and may not replace the deterministic consensus machinery.",
+    "Toxicophore and alert agreement is a soft similarity layer, not a hard cluster gate.",
+    "Missing profile or alert values reduce evidence strength but do not force a split.",
+    "Any future hard gating must be approved as a separate change request."
+  ]
+}

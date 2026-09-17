@@ -1,0 +1,56 @@
+.env
+.env.*
+!.env.example
+chem_engine.db
+chem_engine.db-*
+# Versioned distribution/reference assets. Publish through approved release
+# storage or Git LFS, not ordinary Git history.
+chemical_taxonomies_v1_1.sqlite
+ChemicalTaxonomies/ChemicalTaxonomies_v1.1.txt
+*.sqlite
+__pycache__/
+*.py[cod]
+.build-venv/
+venv/
+node_modules/
+build/
+build_stage2/
+dist/
+dist_stage2/
+runtime_smoke_temp/
+build_beta/
+build_preflight/
+dist_preflight/
+release_beta/
+outputs/
+diagnostics/
+.render_review/
+docx_render_*/
+render_*/
+_tmp/
+tmp/
+reports to compare/
+*.log
+phase_b_smoke.json
+knowledge_graph.cypher
+*_raw.json
+# Generated or source-data artifacts. Keep test fixtures as text/CSV/JSON;
+# distribute approved binary reports and reference datasets outside Git.
+*.xlsx
+*.xls
+*.pdf
+*.docx
+*.pptx
+architecture-*.png
+architecture-*.layout.json
+product_architecture_*.png
+product_architecture_*.pptx
+product_architecture_*.inspect.ndjson
+_tmp_architecture_slide/
+product_architecture_three_slides_renders/
+scratch/
+scratch_vectorized_dist.py
+debug_*.py
+patch_*.py
+append_worker*.py
+main_reconstructed_fallback.py

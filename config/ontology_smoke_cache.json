@@ -1,0 +1,28 @@
+{
+  "fixture_only": true,
+  "cache_version": "smoke-fixture-1.0.0",
+  "source": "Approved reference classifications supplied for PRISM validation",
+  "records": {
+    "MNZAKDODWSQONA-UHFFFAOYSA-N": {
+      "kingdom": "Organic compounds",
+      "superclass": "Organophosphorus compounds",
+      "class": "Organic phosphines and derivatives",
+      "subclass": "Organophosphine oxides",
+      "direct_parent": "Organophosphine oxides"
+    },
+    "CIHOLLKRGTVIJN-UHFFFAOYSA-N": {
+      "kingdom": "Organic compounds",
+      "superclass": "Organic oxygen compounds",
+      "class": "Organic hydroperoxides",
+      "subclass": "Organic hydroperoxides",
+      "direct_parent": "Organic hydroperoxides"
+    },
+    "LSXWFXONGKSEMY-UHFFFAOYSA-N": {
+      "kingdom": "Organic compounds",
+      "superclass": "Organic oxygen compounds",
+      "class": "Organic oxides",
+      "subclass": "Organic peroxides",
+      "direct_parent": "Dialkyl peroxides"
+    }
+  }
+}

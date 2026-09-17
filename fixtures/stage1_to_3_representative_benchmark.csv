@@ -1,0 +1,14 @@
+Fixture_ID,Compound Name,Standardized SMILES,Cluster ID,Identity Status,Est Conc (ug/device),Fixture Role
+B01,Anisole,COc1ccccc1,Cluster_A,Resolved,1.2,Coherent aromatic ether analogue with exposure field
+B02,Phenetole,CCOc1ccccc1,Cluster_A,Resolved,,Coherent aromatic ether analogue
+B03,Propoxybenzene,CCCOc1ccccc1,Cluster_A,Resolved,,Coherent aromatic ether analogue
+B04,Dodecyloxybenzene,CCCCCCCCCCCCOc1ccccc1,Cluster_A,Resolved,,Same-scaffold high-property member
+B05,Phenethyl alcohol,OCCc1ccccc1,Cluster_B,Resolved,,Aromatic member without aldehyde alert
+B06,4-vinylbenzaldehyde,O=Cc1ccc(C=C)cc1,Cluster_B,Resolved,,Unique aldehyde toxicophore and alert member
+B07,Acetic acid,CC(=O)O,Cluster_Acid,Resolved,,Likely acidic singleton
+B08,Triethylamine,CCN(CC)CC,Cluster_Base,Resolved,,Likely basic singleton
+B09,Glycine,NCC(=O)O,Cluster_Amphoteric,Resolved,,Amphoteric singleton
+B10,Tetramethylammonium,C[N+](C)(C)C,Cluster_Charged,Resolved,,Permanently charged singleton
+B11,Surrogate identity phenyl ether,COc1ccccc1,Cluster_Surrogate,Surrogate SMILES (Homologue),,Surrogate-identity limitation
+B12,Unresolved identity,,Cluster_Unresolved,Tier 3: Class Fallback Required (No Structure),,Missing structure and unresolved identity
+B13,Invalid structure,not-a-smiles,Cluster_Invalid,Resolved,,Invalid structure

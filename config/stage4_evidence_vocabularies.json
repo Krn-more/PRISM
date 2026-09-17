@@ -1,0 +1,12 @@
+{
+  "vocabulary_version": "1.0.0",
+  "endpoint_families": ["Genotoxicity", "Sensitisation", "Systemic toxicity", "Reproductive/developmental toxicity", "Carcinogenicity"],
+  "results": ["Positive", "Negative", "Equivocal", "Inconclusive", "Not applicable", "Not reported", "Other"],
+  "study_types": ["In vitro", "In vivo", "Human", "In silico", "Read-across", "Other", "Not reported"],
+  "species": ["Human", "Mouse", "Rat", "Rabbit", "Guinea pig", "Other", "Not applicable", "Not reported"],
+  "routes": ["Oral", "Dermal", "Inhalation", "Parenteral", "In vitro", "Other", "Not applicable", "Not reported"],
+  "reliability": ["Reliable without restrictions", "Reliable with restrictions", "Not reliable", "Not assignable", "Not reported"],
+  "evidence_statuses": ["Retrieved", "No record retrieved", "Incomplete"],
+  "reviewer_statuses": ["Not reviewed", "Accepted", "Needs review", "Rejected"],
+  "mapping_methods": ["Exact identifier", "Exact structure", "CASRN", "DTXSID", "Surrogate", "Manual mapping"]
+}

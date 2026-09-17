@@ -1,0 +1,65 @@
+{
+  "policy_name": "deterministic_clustering_policy",
+  "rule_version": "1.0.0-freeze",
+  "mode": "review_only",
+  "scope": "consensus_clustering",
+  "purpose": "Freeze the current deterministic clustering logic as an audit baseline without changing cluster membership or decisions.",
+  "frozen_inputs": [
+    "Standardized SMILES",
+    "Murcko scaffold",
+    "Fingerprint ensemble",
+    "Physicochemical descriptor profile",
+    "Alert profile"
+  ],
+  "distance_components": [
+    {
+      "name": "scaffold",
+      "weight": 0.3,
+      "source": "Murcko scaffold mismatch",
+      "role": "hard structural anchor"
+    },
+    {
+      "name": "fingerprint_ensemble",
+      "weight": 0.25,
+      "source": "Morgan + MACCS + atom-pair + topological torsion + Avalon fingerprints",
+      "role": "structural similarity anchor"
+    },
+    {
+      "name": "descriptor_profile",
+      "weight": 0.25,
+      "source": "MW, LogP, TPSA, Min_EState, Max_EState, 3D_Asphericity, 3D_PMI1, 3D_PMI2, 3D_PMI3, 3D_RadiusOfGyration",
+      "role": "property similarity support"
+    },
+    {
+      "name": "alerts",
+      "weight": 0.2,
+      "source": "Current Alerts column",
+      "role": "hazard-context support"
+    }
+  ],
+  "consensus_algorithms": [
+    {
+      "name": "Butina",
+      "role": "primary seed clustering"
+    },
+    {
+      "name": "DBSCAN",
+      "role": "density consistency check"
+    },
+    {
+      "name": "AgglomerativeClustering",
+      "role": "hierarchical consistency check"
+    },
+    {
+      "name": "SpectralClustering",
+      "role": "graph consensus check"
+    }
+  ],
+  "final_consensus_cutoff": 0.5,
+  "governance": [
+    "Do not change weights, algorithms, or cutoff without an approved revision.",
+    "Do not reinterpret review-only domain evidence as a new clustering model.",
+    "This policy is record-keeping only and must not alter cluster membership.",
+    "Phase 2 may refine clustering inputs only after the frozen baseline is accepted."
+  ]
+}

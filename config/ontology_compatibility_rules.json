@@ -1,0 +1,36 @@
+{
+  "ontology_mapping_version": "1.0.0",
+  "source": "Approved local ontology-compatibility mappings",
+  "mappings": {
+    "STC-PER-001": {
+      "local_class": "Dialkyl peroxide",
+      "mapping_status": "Mapped",
+      "kingdom": "Organic compounds",
+      "superclass": "Organic oxygen compounds",
+      "class": "Organic oxides",
+      "subclass": "Organic peroxides",
+      "direct_parent": "Dialkyl peroxides",
+      "mapping_evidence": "Approved reference: di-tert-butyl peroxide (LSXWFXONGKSEMY-UHFFFAOYSA-N)"
+    },
+    "STC-HYP-001": {
+      "local_class": "Organic hydroperoxide",
+      "mapping_status": "Mapped",
+      "kingdom": "Organic compounds",
+      "superclass": "Organic oxygen compounds",
+      "class": "Organic hydroperoxides",
+      "subclass": "Organic hydroperoxides",
+      "direct_parent": "Organic hydroperoxides",
+      "mapping_evidence": "Approved reference: tert-butyl hydroperoxide (CIHOLLKRGTVIJN-UHFFFAOYSA-N)"
+    },
+    "STC-PHO-003": {
+      "local_class": "Trialkylphosphine oxide",
+      "mapping_status": "Mapped",
+      "kingdom": "Organic compounds",
+      "superclass": "Organophosphorus compounds",
+      "class": "Organic phosphines and derivatives",
+      "subclass": "Organophosphine oxides",
+      "direct_parent": "Organophosphine oxides",
+      "mapping_evidence": "Approved reference: tributylphosphine oxide (MNZAKDODWSQONA-UHFFFAOYSA-N)"
+    }
+  }
+}
